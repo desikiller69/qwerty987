@@ -1,0 +1,122 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_HEAP_SIZE 100
+
+typedef struct MaxHeap {
+    int heap[MAX_HEAP_SIZE];
+    int size;
+} MaxHeap;
+
+void swap(int *a, int *b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+void heapifyUp(MaxHeap *maxHeap, int index) {
+    int parent = (index - 1) / 2;
+    while (index > 0 && maxHeap->heap[index] > maxHeap->heap[parent]) {
+        swap(&maxHeap->heap[index], &maxHeap->heap[parent]);
+        index = parent;
+        parent = (index - 1) / 2;
+    }
+}
+
+void heapifyDown(MaxHeap *maxHeap, int index) {
+    int leftChild = 2 * index + 1;
+    int rightChild = 2 * index + 2;
+    int largest = index;
+
+    if (leftChild < maxHeap->size && maxHeap->heap[leftChild] > maxHeap->heap[largest]) {
+        largest = leftChild;
+    }
+
+    if (rightChild < maxHeap->size && maxHeap->heap[rightChild] > maxHeap->heap[largest]) {
+        largest = rightChild;
+    }
+
+    if (largest != index) {
+        swap(&maxHeap->heap[index], &maxHeap->heap[largest]);
+        heapifyDown(maxHeap, largest);
+    }
+}
+
+void insert(MaxHeap *maxHeap, int value) {
+    if (maxHeap->size >= MAX_HEAP_SIZE) {
+        printf("Heap is full, cannot insert.\n");
+        return;
+    }
+
+    maxHeap->heap[maxHeap->size] = value;
+    maxHeap->size++;
+    heapifyUp(maxHeap, maxHeap->size - 1);
+}
+
+int removeMax(MaxHeap *maxHeap) {
+    if (maxHeap->size == 0) {
+        printf("Heap is empty, cannot remove.\n");
+        return -1; // Returning -1 to indicate an error.
+    }
+
+    int maxValue = maxHeap->heap[0];
+    maxHeap->heap[0] = maxHeap->heap[maxHeap->size - 1];
+    maxHeap->size--;
+    heapifyDown(maxHeap, 0);
+    return maxValue;
+}
+
+void deleteElement(MaxHeap *maxHeap, int value) {
+    int i;
+    for (i = 0; i < maxHeap->size; i++) {
+        if (maxHeap->heap[i] == value) {
+            break;
+        }
+    }
+
+    if (i == maxHeap->size) {
+        printf("Element %d not found in the heap.\n", value);
+        return;
+    }
+
+    maxHeap->heap[i] = maxHeap->heap[maxHeap->size - 1];
+    maxHeap->size--;
+    heapifyDown(maxHeap, i);
+}
+
+void print(MaxHeap *maxHeap) {
+    for (int i = 0; i < maxHeap->size; i++) {
+        printf("%d ", maxHeap->heap[i]);
+    }
+    printf("\n");
+}
+
+int main() {
+    MaxHeap maxHeap;
+    maxHeap.size = 0;
+
+    insert(&maxHeap, 4);
+    insert(&maxHeap, 10);
+    insert(&maxHeap, 7);
+    insert(&maxHeap, 1);
+    insert(&maxHeap, 8);
+    insert(&maxHeap, 15);
+
+    printf("Max Heap: ");
+    print(&maxHeap);
+
+    deleteElement(&maxHeap, 7);
+    printf("Max Heap after deleting 7: ");
+    print(&maxHeap);
+
+    insert(&maxHeap, 14);
+    printf("Max Heap after inserting 14: ");
+    print(&maxHeap);
+
+    int maxVal = removeMax(&maxHeap);
+    printf("Removed max value: %d\n", maxVal);
+    printf("Max Heap after removal: ");
+    print(&maxHeap);
+
+    return 0;
+}
