@@ -1,0 +1,58 @@
+#include <iostream>
+
+// Function to calculate Fibonacci series using recursion
+int fibonacci(int n) {
+    if (n <= 1)
+        return n;
+    return fibonacci(n - 1) + fibonacci(n - 2);
+}
+
+// Function to calculate factorial using recursion
+int factorial(int n) {
+    if (n == 0 || n == 1)
+        return 1;
+    return n * factorial(n - 1);
+}
+
+int main() {
+    int choice, n;
+    
+    while (true) {
+        std::cout << "Menu:\n";
+        std::cout << "1. Calculate Fibonacci Series\n";
+        std::cout << "2. Calculate Factorial\n";
+        std::cout << "3. Quit\n";
+        std::cout << "Enter your choice: ";
+        std::cin >> choice;
+        
+        switch (choice) {
+            case 1:
+                std::cout << "Enter the value of n for Fibonacci series: ";
+                std::cin >> n;
+                for (int i = 0; i < n; i++) {
+                    std::cout << fibonacci(i) << " ";
+                }
+                std::cout << "\n";
+                break;
+                
+            case 2:
+                std::cout << "Enter the value of n for factorial: ";
+                std::cin >> n;
+                if (n < 0) {
+                    std::cout << "Factorial is not defined for negative numbers.\n";
+                } else {
+                    std::cout << "Factorial of " << n << " is: " << factorial(n) << "\n";
+                }
+                break;
+                
+            case 3:
+                std::cout << "Exiting the program.\n";
+                return 0;
+                
+            default:
+                std::cout << "Invalid choice. Please try again.\n";
+        }
+    }
+
+    return 0;
+}
