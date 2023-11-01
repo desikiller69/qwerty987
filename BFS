@@ -1,0 +1,126 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_NODES 100
+
+struct Node {
+    int data;
+    struct Node* next;
+};
+
+struct Queue {
+    int front, rear, size;
+    unsigned capacity;
+    int* array;
+};
+
+struct Graph {
+    int numNodes;
+    struct Node* adjacencyList[MAX_NODES];
+    int visited[MAX_NODES];
+};
+
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->next = NULL;
+    return newNode;
+}
+
+struct Queue* createQueue(unsigned capacity) {
+    struct Queue* queue = (struct Queue*)malloc(sizeof(struct Queue));
+    queue->capacity = capacity;
+    queue->front = queue->size = 0;
+    queue->rear = capacity - 1;
+    queue->array = (int*)malloc(queue->capacity * sizeof(int));
+    return queue;
+}
+
+int isFull(struct Queue* queue) {
+    return (queue->size == queue->capacity);
+}
+
+int isEmpty(struct Queue* queue) {
+    return (queue->size == 0);
+}
+
+void enqueue(struct Queue* queue, int item) {
+    if (isFull(queue))
+        return;
+    queue->rear = (queue->rear + 1) % queue->capacity;
+    queue->array[queue->rear] = item;
+    queue->size++;
+}
+
+int dequeue(struct Queue* queue) {
+    if (isEmpty(queue))
+        return -1;
+    int item = queue->array[queue->front];
+    queue->front = (queue->front + 1) % queue->capacity;
+    queue->size--;
+    return item;
+}
+
+struct Graph* createGraph(int nodes) {
+    struct Graph* graph = (struct Graph*)malloc(sizeof(struct Graph));
+    graph->numNodes = nodes;
+    for (int i = 0; i < nodes; i++) {
+        graph->adjacencyList[i] = NULL;
+        graph->visited[i] = 0;
+    }
+    return graph;
+}
+
+void addEdge(struct Graph* graph, int src, int dest) {
+    struct Node* newNode = createNode(dest);
+    newNode->next = graph->adjacencyList[src];
+    graph->adjacencyList[src] = newNode;
+}
+
+void BFS(struct Graph* graph, int startNode) {
+    struct Queue* queue = createQueue(graph->numNodes);
+    graph->visited[startNode] = 1;
+    enqueue(queue, startNode);
+
+    while (!isEmpty(queue)) {
+        int current = dequeue(queue);
+        printf("Visited node: %d\n", current);
+
+        struct Node* temp = graph->adjacencyList[current];
+        while (temp != NULL) {
+            int adjNode = temp->data;
+            if (graph->visited[adjNode] == 0) {
+                graph->visited[adjNode] = 1;
+                enqueue(queue, adjNode);
+            }
+            temp = temp->next;
+        }
+    }
+}
+
+int main() {
+    int numNodes, numEdges;
+    printf("Enter the number of nodes: ");
+    scanf("%d", &numNodes);
+
+    struct Graph* graph = createGraph(numNodes);
+
+    printf("Enter the number of edges: ");
+    scanf("%d", &numEdges);
+
+    printf("Enter the edges (src dest):\n");
+    for (int i = 0; i < numEdges; i++) {
+        int src, dest;
+        scanf("%d %d", &src, &dest);
+        addEdge(graph, src, dest);
+    }
+
+    int startNode;
+    printf("Enter the starting node for BFS: ");
+    scanf("%d", &startNode);
+
+    printf("Breadth-First Traversal starting from node %d:\n", startNode);
+    BFS(graph, startNode);
+
+    return 0;
+}
