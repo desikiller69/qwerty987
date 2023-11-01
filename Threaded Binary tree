@@ -1,0 +1,135 @@
+#include<bits/stdc++.h>
+using namespace std;
+ 
+struct Node
+{
+    int data;
+    Node *left, *right;
+ 
+    // False if the left pointer points to its in-order predecessor
+    bool leftThread;
+ 
+    // False if the right pointer points to its in-order successor
+    bool rightThread;
+};
+ 
+// Insertion of a Node in a Threaded Binary Tree
+struct Node *insert(struct Node *root, int key)
+{
+    // Searching for a Node with given value
+    Node *ptr = root;
+    Node *parent = NULL; // Parent of key to be inserted
+    while (ptr != NULL)
+    {
+        // If the key already exists, return it
+        if (key == (ptr->data))
+        {
+            printf("Duplicate Key !\n");
+            return root;
+        }
+ 
+        parent = ptr; // Update parent pointer
+ 
+        // Moving on to the left subtree.
+        if (key < ptr->data)
+        {
+            if (ptr -> leftThread == false)
+                ptr = ptr -> left;
+            else
+                break;
+        }
+ 
+        // Moving on to the right subtree.
+        else
+        {
+            if (ptr->rightThread == false)
+                ptr = ptr -> right;
+            else
+                break;
+        }
+    }
+ 
+    // Create a new node
+    Node *value = new Node;
+    value -> data = key;
+    value -> leftThread = true;
+    value -> rightThread = true;
+ 
+    if (parent == NULL)
+    {
+        root = value;
+        value -> left = NULL;
+        value -> right = NULL;
+    }
+    else if (key < (parent -> data))
+    {
+        value -> left = parent -> left;
+        value -> right = parent;
+        parent -> leftThread = false;
+        parent -> left = value;
+    }
+    else
+    {
+        value -> left = parent;
+        value -> right = parent -> right;
+        parent -> rightThread = false;
+        parent -> right = value;
+    }
+ 
+    return root;
+}
+ 
+// Returns the inorder successor using rightThread
+struct Node *inorderSuccessor(struct Node *ptr)
+{
+    // If rightThread is set, we can quickly find
+    if (ptr -> rightThread == true)
+        return ptr->right;
+ 
+    // Else return leftmost child of right subtree
+    ptr = ptr -> right;
+    while (ptr -> leftThread == false)
+        ptr = ptr -> left;
+    return ptr;
+}
+ 
+// Printing of the threaded tree
+void inorder(struct Node *root)
+{
+    if (root == NULL)
+        printf("Tree is empty");
+ 
+    // In leftmost node
+    struct Node *ptr = root;
+    while (ptr -> leftThread == false)
+        ptr = ptr -> left;
+ 
+    // One by one print successors
+    while (ptr != NULL)
+    {
+        cout<<ptr -> data<<"  ";
+        ptr = inorderSuccessor(ptr);
+    }
+}
+ 
+// Driver Program
+int main()
+{
+    struct Node *root = NULL;
+ 
+    root = insert(root, 23);
+    root = insert(root, 4);
+    root = insert(root, 30);
+    root = insert(root, 11);
+    root = insert(root, 7);
+    root = insert(root, 34);
+    root = insert(root, 20);
+    root = insert(root, 24);
+    root = insert(root, 1);
+
+
+    inorder(root);
+
+
+    return 0;
+}
