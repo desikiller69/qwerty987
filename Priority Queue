@@ -1,0 +1,97 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_HEAP_SIZE 100
+
+// Structure to represent a node in the binary heap
+struct Node {
+    int data;
+    int priority;
+};
+
+// Structure to represent a priority queue
+struct PriorityQueue {
+    struct Node heap[MAX_HEAP_SIZE];
+    int size;
+};
+
+// Function to initialize an empty priority queue
+void initializeQueue(struct PriorityQueue* pq) {
+    pq->size = 0;
+}
+
+// Function to swap two nodes in the heap
+void swap(struct Node* a, struct Node* b) {
+    struct Node temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+// Function to maintain the min-heap property after inserting a node
+void heapifyUp(struct PriorityQueue* pq, int index) {
+    int parent = (index - 1) / 2;
+    while (index > 0 && pq->heap[index].priority < pq->heap[parent].priority) {
+        swap(&pq->heap[index], &pq->heap[parent]);
+        index = parent;
+        parent = (index - 1) / 2;
+    }
+}
+
+// Function to insert an element with its priority into the priority queue
+void insert(struct PriorityQueue* pq, int data, int priority) {
+    if (pq->size >= MAX_HEAP_SIZE) {
+        printf("Queue is full. Cannot insert.\n");
+        return;
+    }
+
+    pq->heap[pq->size].data = data;
+    pq->heap[pq->size].priority = priority;
+    pq->size++;
+    heapifyUp(pq, pq->size - 1);
+}
+
+// Function to maintain the min-heap property after extracting the minimum
+void heapifyDown(struct PriorityQueue* pq, int index) {
+    int left = 2 * index + 1;
+    int right = 2 * index + 2;
+    int smallest = index;
+
+    if (left < pq->size && pq->heap[left].priority < pq->heap[smallest].priority)
+        smallest = left;
+    if (right < pq->size && pq->heap[right].priority < pq->heap[smallest].priority)
+        smallest = right;
+
+    if (smallest != index) {
+        swap(&pq->heap[index], &pq->heap[smallest]);
+        heapifyDown(pq, smallest);
+    }
+}
+
+// Function to extract the element with the highest priority (min priority)
+int extractMin(struct PriorityQueue* pq) {
+    if (pq->size == 0) {
+        printf("Queue is empty. Cannot extract minimum.\n");
+        return -1; // Or some sentinel value indicating an empty queue
+    }
+
+    int min = pq->heap[0].data;
+    pq->size--;
+    pq->heap[0] = pq->heap[pq->size];
+    heapifyDown(pq, 0);
+    return min;
+}
+
+int main() {
+    struct PriorityQueue pq;
+    initializeQueue(&pq);
+
+    insert(&pq, 10, 2);
+    insert(&pq, 20, 1);
+    insert(&pq, 30, 3);
+
+    printf("Extracted: %d\n", extractMin(&pq)); // Should print 20
+    printf("Extracted: %d\n", extractMin(&pq)); // Should print 10
+    printf("Extracted: %d\n", extractMin(&pq)); // Should print 30
+
+    return 0;
+}
