@@ -1,0 +1,144 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Structure for a BST node
+struct TreeNode {
+    int data;
+    struct TreeNode* left;
+    struct TreeNode* right;
+};
+
+// Stack structure for non-recursive traversal
+struct StackNode {
+    struct TreeNode* data;
+    struct StackNode* next;
+};
+
+struct StackNode* createStackNode(struct TreeNode* data) {
+    struct StackNode* newNode = (struct StackNode*)malloc(sizeof(struct StackNode));
+    newNode->data = data;
+    newNode->next = NULL;
+    return newNode;
+}
+
+void push(struct StackNode** top, struct TreeNode* data) {
+    struct StackNode* newNode = createStackNode(data);
+    newNode->next = *top;
+    *top = newNode;
+}
+
+struct TreeNode* pop(struct StackNode** top) {
+    if (*top == NULL) return NULL;
+    struct StackNode* temp = *top;
+    *top = (*top)->next;
+    struct TreeNode* popped = temp->data;
+    free(temp);
+    return popped;
+}
+
+int isEmpty(struct StackNode* top) {
+    return top == NULL;
+}
+
+// Function to perform in-order traversal
+void inOrderTraversal(struct TreeNode* root) {
+    if (root == NULL) return;
+    struct StackNode* stack = NULL;
+    struct TreeNode* current = root;
+
+    while (current != NULL || !isEmpty(stack)) {
+        while (current != NULL) {
+            push(&stack, current);
+            current = current->left;
+        }
+
+        current = pop(&stack);
+        printf("%d ", current->data);
+        current = current->right;
+    }
+}
+
+// Function to perform pre-order traversal
+void preOrderTraversal(struct TreeNode* root) {
+    if (root == NULL) return;
+    struct StackNode* stack = NULL;
+    push(&stack, root);
+
+    while (!isEmpty(stack)) {
+        struct TreeNode* current = pop(&stack);
+        printf("%d ", current->data);
+
+        if (current->right != NULL) {
+            push(&stack, current->right);
+        }
+        if (current->left != NULL) {
+            push(&stack, current->left);
+        }
+    }
+}
+
+// Function to perform post-order traversal
+void postOrderTraversal(struct TreeNode* root) {
+    if (root == NULL) return;
+    struct StackNode* stack1 = NULL;
+    struct StackNode* stack2 = NULL;
+
+    push(&stack1, root);
+
+    while (!isEmpty(stack1)) {
+        struct TreeNode* current = pop(&stack1);
+        push(&stack2, current);
+
+        if (current->left != NULL) {
+            push(&stack1, current->left);
+        }
+        if (current->right != NULL) {
+            push(&stack1, current->right);
+        }
+    }
+
+    while (!isEmpty(stack2)) {
+        struct TreeNode* current = pop(&stack2);
+        printf("%d ", current->data);
+    }
+}
+
+// Main function
+int main() {
+    struct TreeNode* root = NULL;
+
+    // Create a sample BST
+    root = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+    root->data = 4;
+    root->left = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+    root->left->data = 2;
+    root->left->left = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+    root->left->left->data = 1;
+    root->left->left->left = root->left->left->right = NULL;
+    root->left->right = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+    root->left->right->data = 3;
+    root->left->right->left = root->left->right->right = NULL;
+
+    root->right = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+    root->right->data = 6;
+    root->right->left = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+    root->right->left->data = 5;
+    root->right->left->left = root->right->left->right = NULL;
+    root->right->right = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+    root->right->right->data = 7;
+    root->right->right->left = root->right->right->right = NULL;
+
+    printf("In-Order Traversal: ");
+    inOrderTraversal(root);
+    printf("\n");
+
+    printf("Pre-Order Traversal: ");
+    preOrderTraversal(root);
+    printf("\n");
+
+    printf("Post-Order Traversal: ");
+    postOrderTraversal(root);
+    printf("\n");
+
+    return 0;
+}
