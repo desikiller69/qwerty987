@@ -1,0 +1,67 @@
+#include <stdio.h>
+#include <string.h>
+
+#define TABLE_SIZE 10
+
+// Define a structure for the data you want to store
+struct Data {
+    int key;
+    char value[50];
+};
+
+// Define the hash table
+struct Data hashTable[TABLE_SIZE];
+
+// Initialize the hash table
+void initHashTable() {
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        hashTable[i].key = -1;  // -1 indicates an empty slot
+        strcpy(hashTable[i].value, "");
+    }
+}
+
+// Hash function to calculate the index for a given key
+int hashFunction(int key) {
+    return key % TABLE_SIZE;
+}
+
+// Insert data into the hash table
+void insertData(int key, const char *value) {
+    int index = hashFunction(key);
+    while (hashTable[index].key != -1) {
+        index = (index + 1) % TABLE_SIZE; // Linear probing for collision resolution
+    }
+    hashTable[index].key = key;
+    strcpy(hashTable[index].value, value);
+}
+
+// Search for data in the hash table
+int searchData(int key) {
+    int index = hashFunction(key);
+    while (hashTable[index].key != -1) {
+        if (hashTable[index].key == key) {
+            return index;
+        }
+        index = (index + 1) % TABLE_SIZE;
+    }
+    return -1; // Data not found
+}
+
+int main() {
+    initHashTable();
+
+    insertData(123, "Value1");
+    insertData(456, "Value2");
+    insertData(789, "Value3");
+
+    int searchKey = 456;
+    int result = searchData(searchKey);
+
+    if (result != -1) {
+        printf("Data found at index %d: %s\n", result, hashTable[result].value);
+    } else {
+        printf("Data not found.\n");
+    }
+
+    return 0;
+}
