@@ -1,0 +1,130 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Structure for a node in the AVL tree
+struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+    int height;
+};
+
+// Function to get the height of a node
+int height(struct Node* node) {
+    if (node == NULL)
+        return 0;
+    return node->height;
+}
+
+// Function to get the maximum of two integers
+int max(int a, int b) {
+    return (a > b) ? a : b;
+}
+
+// Function to create a new node with the given data
+struct Node* newNode(int data) {
+    struct Node* node = (struct Node*)malloc(sizeof(struct Node));
+    node->data = data;
+    node->left = NULL;
+    node->right = NULL;
+    node->height = 1;
+    return node;
+}
+
+// Function to perform a right rotation
+struct Node* rightRotate(struct Node* y) {
+    struct Node* x = y->left;
+    struct Node* T2 = x->right;
+
+    x->right = y;
+    y->left = T2;
+
+    y->height = max(height(y->left), height(y->right)) + 1;
+    x->height = max(height(x->left), height(x->right)) + 1;
+
+    return x;
+}
+
+// Function to perform a left rotation
+struct Node* leftRotate(struct Node* x) {
+    struct Node* y = x->right;
+    struct Node* T2 = y->left;
+
+    y->left = x;
+    x->right = T2;
+
+    x->height = max(height(x->left), height(x->right)) + 1;
+    y->height = max(height(y->left), height(y->right)) + 1;
+
+    return y;
+}
+
+// Function to get the balance factor of a node
+int getBalance(struct Node* node) {
+    if (node == NULL)
+        return 0;
+    return height(node->left) - height(node->right);
+}
+
+// Function to insert a node into the AVL tree
+struct Node* insert(struct Node* node, int data) {
+    if (node == NULL)
+        return newNode(data);
+
+    if (data < node->data)
+        node->left = insert(node->left, data);
+    else if (data > node->data)
+        node->right = insert(node->right, data);
+    else
+        return node; // Duplicate data is not allowed
+
+    node->height = 1 + max(height(node->left), height(node->right));
+
+    int balance = getBalance(node);
+
+    // Left heavy case
+    if (balance > 1 && data < node->left->data)
+        return rightRotate(node);
+
+    // Right heavy case
+    if (balance < -1 && data > node->right->data)
+        return leftRotate(node);
+
+    // Left-Right case
+    if (balance > 1 && data > node->left->data) {
+        node->left = leftRotate(node->left);
+        return rightRotate(node);
+    }
+
+    // Right-Left case
+    if (balance < -1 && data < node->right->data) {
+        node->right = rightRotate(node->right);
+        return leftRotate(node);
+    }
+
+    return node;
+}
+
+// Function to print the AVL tree in-order
+void inOrder(struct Node* node) {
+    if (node == NULL)
+        return;
+    inOrder(node->left);
+    printf("%d ", node->data);
+    inOrder(node->right);
+}
+
+int main() {
+    int arr[] = {23, 12, 35, 76, 25, 6, 8};
+    int n = sizeof(arr) / sizeof(arr[0]);
+    struct Node* root = NULL;
+
+    for (int i = 0; i < n; i++) {
+        root = insert(root, arr[i]);
+    }
+
+    printf("In-order traversal of the AVL tree: ");
+    inOrder(root);
+
+    return 0;
+}
