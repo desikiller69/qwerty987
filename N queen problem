@@ -1,0 +1,74 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+#define N 8  // Change N to the desired board size
+
+int board[N][N];
+
+// Function to print the chessboard
+void printBoard() {
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            printf("%2d ", board[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+// Function to check if a queen can be placed in a given cell
+bool isSafe(int row, int col) {
+    int i, j;
+
+    // Check the left side of the current row
+    for (i = 0; i < col; i++) {
+        if (board[row][i])
+            return false;
+    }
+
+    // Check upper diagonal on the left side
+    for (i = row, j = col; i >= 0 && j >= 0; i--, j--) {
+        if (board[i][j])
+            return false;
+    }
+
+    // Check lower diagonal on the left side
+    for (i = row, j = col; i < N && j >= 0; i++, j--) {
+        if (board[i][j])
+            return false;
+    }
+
+    return true;
+}
+
+// Recursive function to solve the N-Queens problem
+bool solveNQueens(int col) {
+    if (col >= N)
+        return true;
+
+    for (int i = 0; i < N; i++) {
+        if (isSafe(i, col)) {
+            board[i][col] = 1;
+            if (solveNQueens(col + 1))
+                return true;
+            board[i][col] = 0;  // Backtrack
+        }
+    }
+    return false;
+}
+
+int main() {
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            board[i][j] = 0;
+        }
+    }
+
+    if (solveNQueens(0)) {
+        printf("Solution exists:\n");
+        printBoard();
+    } else {
+        printf("No solution exists.\n");
+    }
+
+    return 0;
+}
