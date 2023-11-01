@@ -1,0 +1,113 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Structure to represent a node in the BST
+typedef struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+} Node;
+
+// Function to create a new node with a given value
+Node* createNode(int value) {
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    newNode->data = value;
+    newNode->left = newNode->right = NULL;
+    return newNode;
+}
+
+// Function to insert a value into the BST
+Node* insert(Node* root, int value) {
+    if (root == NULL) {
+        return createNode(value);
+    }
+
+    if (value < root->data) {
+        root->left = insert(root->left, value);
+    } else if (value > root->data) {
+        root->right = insert(root->right, value);
+    }
+
+    return root;
+}
+
+// Function to find the minimum value node in a BST
+Node* findMin(Node* root) {
+    while (root->left != NULL) {
+        root = root->left;
+    }
+    return root;
+}
+
+// Function to delete a node with a given value from the BST
+Node* deleteNode(Node* root, int value) {
+    if (root == NULL) {
+        return root;
+    }
+
+    if (value < root->data) {
+        root->left = deleteNode(root->left, value);
+    } else if (value > root->data) {
+        root->right = deleteNode(root->right, value);
+    } else {
+        // Node with the value to be deleted found
+        if (root->left == NULL) {
+            Node* temp = root->right;
+            free(root);
+            return temp;
+        } else if (root->right == NULL) {
+            Node* temp = root->left;
+            free(root);
+            return temp;
+        }
+
+        // Node with two children; get the in-order successor (smallest in the right subtree)
+        Node* temp = findMin(root->right);
+
+        // Copy the in-order successor's content to this node
+        root->data = temp->data;
+
+        // Delete the in-order successor
+        root->right = deleteNode(root->right, temp->data);
+    }
+    return root;
+}
+
+// Function to perform an in-order traversal of the BST
+void inOrderTraversal(Node* root) {
+    if (root != NULL) {
+        inOrderTraversal(root->left);
+        printf("%d ", root->data);
+        inOrderTraversal(root->right);
+    }
+}
+
+int main() {
+    Node* root = NULL;
+
+    root = insert(root, 50);
+    root = insert(root, 30);
+    root = insert(root, 20);
+    root = insert(root, 40);
+    root = insert(root, 70);
+    root = insert(root, 60);
+    root = insert(root, 80);
+
+    printf("BST (In-Order Traversal): ");
+    inOrderTraversal(root);
+    printf("\n");
+
+    int insertValue = 35;
+    root = insert(root, insertValue); // Inserting a value
+    printf("BST after inserting %d: ", insertValue);
+    inOrderTraversal(root);
+    printf("\n");
+
+    int deleteValue = 30;
+    root = deleteNode(root, deleteValue); // Deleting a value
+    printf("BST after deleting %d: ", deleteValue);
+    inOrderTraversal(root);
+    printf("\n");
+
+    return 0;
+}
