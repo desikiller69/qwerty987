@@ -1,0 +1,196 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct AVLNode {
+    int key;
+    struct AVLNode *left;
+    struct AVLNode *right;
+    int height;
+};
+
+// Function to calculate the height of a node
+int height(struct AVLNode *node) {
+    if (node == NULL)
+        return 0;
+    return node->height;
+}
+
+// Function to calculate the balance factor of a node
+int getBalance(struct AVLNode *node) {
+    if (node == NULL)
+        return 0;
+    return height(node->left) - height(node->right);
+}
+
+// Function to rotate right
+struct AVLNode *rotateRight(struct AVLNode *y) {
+    struct AVLNode *x = y->left;
+    struct AVLNode *T2 = x->right;
+
+    x->right = y;
+    y->left = T2;
+
+    y->height = 1 + ((height(y->left) > height(y->right)) ? height(y->left) : height(y->right));
+    x->height = 1 + ((height(x->left) > height(x->right)) ? height(x->left) : height(x->right));
+
+    return x;
+}
+
+// Function to rotate left
+struct AVLNode *rotateLeft(struct AVLNode *x) {
+    struct AVLNode *y = x->right;
+    struct AVLNode *T2 = y->left;
+
+    y->left = x;
+    x->right = T2;
+
+    x->height = 1 + ((height(x->left) > height(x->right)) ? height(x->left) : height(x->right));
+    y->height = 1 + ((height(y->left) > height(y->right)) ? height(y->left) : height(y->right));
+
+    return y;
+}
+
+// Function to create a new AVL node
+struct AVLNode *createNode(int key) {
+    struct AVLNode *node = (struct AVLNode *)malloc(sizeof(struct AVLNode));
+    node->key = key;
+    node->left = NULL;
+    node->right = NULL;
+    node->height = 1; // New node is initially added at height 1
+    return node;
+}
+
+// Function to insert a node into the AVL tree
+struct AVLNode *insert(struct AVLNode *root, int key) {
+    if (root == NULL)
+        return createNode(key);
+
+    if (key < root->key)
+        root->left = insert(root->left, key);
+    else if (key > root->key)
+        root->right = insert(root->right, key);
+    else
+        return root; // Duplicate keys are not allowed
+
+    root->height = 1 + ((height(root->left) > height(root->right)) ? height(root->left) : height(root->right));
+
+    int balance = getBalance(root);
+
+    // Left Heavy Case
+    if (balance > 1) {
+        if (key < root->left->key) // Left-Left Case
+            return rotateRight(root);
+        else { // Left-Right Case
+            root->left = rotateLeft(root->left);
+            return rotateRight(root);
+        }
+    }
+    // Right Heavy Case
+    if (balance < -1) {
+        if (key > root->right->key) // Right-Right Case
+            return rotateLeft(root);
+        else { // Right-Left Case
+            root->right = rotateRight(root->right);
+            return rotateLeft(root);
+        }
+    }
+
+    return root;
+}
+
+// Function to find the node with the minimum value in a tree
+struct AVLNode *minValueNode(struct AVLNode *node) {
+    struct AVLNode *current = node;
+    while (current->left != NULL)
+        current = current->left;
+    return current;
+}
+
+// Function to delete a node from the AVL tree
+struct AVLNode *deleteNode(struct AVLNode *root, int key) {
+    if (root == NULL)
+        return root;
+
+    if (key < root->key)
+        root->left = deleteNode(root->left, key);
+    else if (key > root->key)
+        root->right = deleteNode(root->right, key);
+    else {
+        if ((root->left == NULL) || (root->right == NULL)) {
+            struct AVLNode *temp = (root->left) ? root->left : root->right;
+
+            if (temp == NULL) {
+                temp = root;
+                root = NULL;
+            } else {
+                *root = *temp;
+            }
+
+            free(temp);
+        } else {
+            struct AVLNode *temp = minValueNode(root->right);
+            root->key = temp->key;
+            root->right = deleteNode(root->right, temp->key);
+        }
+    }
+
+    if (root == NULL)
+        return root;
+
+    root->height = 1 + ((height(root->left) > height(root->right)) ? height(root->left) : height(root->right));
+
+    int balance = getBalance(root);
+
+    // Left Heavy Case
+    if (balance > 1) {
+        if (getBalance(root->left) >= 0) // Left-Left Case
+            return rotateRight(root);
+        else { // Left-Right Case
+            root->left = rotateLeft(root->left);
+            return rotateRight(root);
+        }
+    }
+    // Right Heavy Case
+    if (balance < -1) {
+        if (getBalance(root->right) <= 0) // Right-Right Case
+            return rotateLeft(root);
+        else { // Right-Left Case
+            root->right = rotateRight(root->right);
+            return rotateLeft(root);
+        }
+    }
+
+    return root;
+}
+
+// Function to print the tree in-order
+void inOrder(struct AVLNode *root) {
+    if (root != NULL) {
+        inOrder(root->left);
+        printf("%d ", root->key);
+        inOrder(root->right);
+    }
+}
+
+int main() {
+    struct AVLNode *root = NULL;
+
+    root = insert(root, 10);
+    root = insert(root, 20);
+    root = insert(root, 30);
+    root = insert(root, 35);
+    root = insert(root, 22);
+    root = insert(root, 25);
+
+    printf("In-order traversal of the AVL tree: ");
+    inOrder(root);
+    printf("\n");
+
+    root = deleteNode(root, 30);
+
+    printf("In-order traversal of the AVL tree after deleting 30: ");
+    inOrder(root);
+    printf("\n");
+
+    return 0;
+}
